@@ -21,3 +21,12 @@ class / MRO
 __getattr__() if defined
       ↓
 AttributeError """
+
+
+class User2:
+      def __init__(self,name):
+            self.name = name 
+
+      def __getattribute__(self, name):
+           print("Looking for ",name)
+           return super().__getattribute__(name)

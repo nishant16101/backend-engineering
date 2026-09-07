@@ -4,15 +4,19 @@ from sqlalchemy.orm import Session
 from . import models
 from .schemas import TaskCreate,TaskUpdate
 
-def create_task(db:Session,task_data:TaskCreate):
+def create_task(db: Session, task_data: TaskCreate):
     task = models.Task(
         title=task_data.title,
-        description = task_data.description,
+        description=task_data.description,
         completed=False
     )
+
     db.add(task)
+
     db.commit()
-    db.refresh()
+
+    db.refresh(task)
+
     return task
 
 def get_tasks(db:Session,skip:int=0,limit:int=100):

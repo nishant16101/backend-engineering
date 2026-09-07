@@ -1,28 +1,33 @@
-from pydantic import BaseModel,Field
+from pydantic import BaseModel, Field
+
 
 class TaskCreate(BaseModel):
-    title:str=Field(
+    title: str = Field(
         min_length=1,
-        max_length =200
+        max_length=200
     )
-    description:str |None = None
+
+    description: str | None = None
 
 
 class TaskUpdate(BaseModel):
-    title:str | None = Field(
+    title: str | None = Field(
         default=None,
-        min_length = 1,
-        max_length = 200
+        min_length=1,
+        max_length=200
     )
-    description:str |None = None
-    completed :bool | None = None
+
+    description: str | None = None
+
+    completed: bool | None = None
+
 
 class TaskResponse(BaseModel):
-    id:int
-    title:str
-    description:str|None
-    completed:bool
+    id: int
+    title: str
+    description: str | None
+    completed: bool
 
-    mode_config = {
-        "from_attribute":True
+    model_config = {
+        "from_attributes": True
     }

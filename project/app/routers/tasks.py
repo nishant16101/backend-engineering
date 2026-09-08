@@ -83,15 +83,19 @@ def update_task(
     )
 
 
-@router.delete(
-    "/{task_id}"
-)
-def delete_task(
-    task_id: int,
-    db: Session = Depends(get_db)
-):
+@router.delete("/{task_id}")
+def delete_task(task_id: int,db: Session = Depends(get_db)):
 
     return task_service.delete_task(
         db,
         task_id
     )
+
+@router.post("/{task_id}/complete")
+def complete_task(task_id:int,db:Session=Depends(get_db)):
+    task = task_service.get_task_by_id(db,task_id)
+    task.complete = True
+    db.commit()
+    db.refresh()
+
+    return task

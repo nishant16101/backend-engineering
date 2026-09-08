@@ -26,3 +26,6 @@ class Task(Base):
         Boolean,
         default=False
     )
+    priority: Mapped[int] = mapped_column(
+    default=0
+    )

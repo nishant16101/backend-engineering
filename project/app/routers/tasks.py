@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
+from sqlalchemy import update
+from ..models import Task
 
 from ..database import get_db
 from ..schemas import (
@@ -102,9 +104,13 @@ def complete_task(task_id:int,db:Session=Depends(get_db)):
 
 @router.post("/{task_id}/increment-priority")
 def increment_priority(task_id:int,db:Session=Depends(get_db)):
-    task = task_service.get_task_by_id(db,task_id)
-    task.priority = task.priority +1
+    statement = (
+        update(Task).where(Task.id == task_id).values(
+            priority = Task.priority +1
+        )
+    )
+    db.execute(statement)
     db.commit()
-    db.refresh(task)
 
+    task = task_service.get_task_by_id(db,task_id)
     return task

@@ -99,3 +99,12 @@ def complete_task(task_id:int,db:Session=Depends(get_db)):
     db.refresh()
 
     return task
+
+@router.post("/{task_id}/increment-priority")
+def increment_priority(task_id:int,db:Session=Depends(get_db)):
+    task = task_service.get_task_by_id(db,task_id)
+    task.priority = task.priority +1
+    db.commit()
+    db.refresh(task)
+
+    return task

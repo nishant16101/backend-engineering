@@ -1,31 +1,66 @@
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .. import crud
-from ..schemas import TaskCreate,TaskUpdate
+from ..schemas import TaskCreate, TaskUpdate
 
-def create_task(db:Session,task_data:TaskCreate):
-    return crud.create_task(
-        db,task_data
+
+async def create_task(db: AsyncSession,task_data: TaskCreate):
+    return await crud.create_task(
+        db,
+        task_data
     )
-def get_all_tasks(db:Session,skip:int=0,limit:int=100):
-    return crud.get_tasks(db,skip,limit)
 
-def get_task_by_id(db:Session,task_id:int):
-    task =  crud.get_task(db,task_id)
+
+async def get_all_tasks(db: AsyncSession,skip: int = 0,limit: int = 100):
+    return await crud.get_tasks(
+        db,
+        skip,
+        limit
+    )
+
+
+async def get_task_by_id(db: AsyncSession,task_id: int):
+    task = await crud.get_task(
+        db,
+        task_id
+    )
+
     if task is None:
-        raise HTTPException(status_code=404,detail="Task not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+
     return task
 
-def update_task(db:Session,task_id:int,task_data:TaskUpdate):
-    task = get_task_by_id(
-        db,task_id
-    )
-    return crud.update_task(db,task,task_data)
 
-def delete_task(db:Session,task_id:int):
-    task = get_task_by_id(db,task_id)
-    crud.delete_task(db,task)
+async def update_task(db: AsyncSession,task_id: int,task_data: TaskUpdate
+):
+    task = await get_task_by_id(
+        db,
+        task_id
+    )
+
+    return await crud.update_task(
+        db,
+        task,
+        task_data
+    )
+
+
+async def delete_task(db: AsyncSession,task_id: int
+):
+    task = await get_task_by_id(
+        db,
+        task_id
+    )
+
+    await crud.delete_task(
+        db,
+        task
+    )
+
     return {
-        "message":"Task deleted sucessfully"
+        "message": "Task deleted successfully"
     }

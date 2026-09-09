@@ -1,29 +1,37 @@
 from fastapi import FastAPI
-from .database import Base,engine
+
+from .database import Base, engine
 from . import models
 from .routers import tasks
 
-Base.metadata.create_all(
-    bind=engine
-)
 
 app = FastAPI(
-    title="Task management",
-    description="Backend engineering practice",
-    version="1.0.0"
+    title="Task Management API",
+    description="Async Backend Engineering Practice",
+    version="2.0.0"
 )
+
+
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(
+            Base.metadata.create_all
+        )
+
 
 @app.get("/")
-def root():
+async def root():
     return {
-        "message":"Task Api is running"
-    }
-@app.get("/health")
-def health_check():
-    return {
-        "status":"healthy"
+        "message": "Async Task API is running"
     }
 
-app.include_router(
-    tasks.router
-)
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy"
+    }
+
+
+app.include_router(tasks.router)

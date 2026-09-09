@@ -1,7 +1,7 @@
 import requests
 from concurrent.futures import ThreadPoolExecutor
 
-URL = URL = "http://127.0.0.1:8000/tasks/3/increment-priority"
+URL = "http://127.0.0.1:8000/tasks/3/increment-priority-locked"
 
 def send_request():
     response = requests.post(URL)

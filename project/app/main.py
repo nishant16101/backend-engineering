@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .database import Base,engine
-from .import models
+from . import models
 from .routers import tasks
 
 Base.metadata.create_all(

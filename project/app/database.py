@@ -13,7 +13,11 @@ if not DATABASE_URL:
     raise ValueError("Database url not configured")
 
 engine = create_engine(
-    DATABASE_URL,echo=True
+    DATABASE_URL,
+    echo=True,
+    pool_size=2,
+    max_overflow=0,
+    pool_timeout=5
 )
 
 #create session factory

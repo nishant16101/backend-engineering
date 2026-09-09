@@ -1,8 +1,9 @@
 # app/routers/tasks.py
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import update
+from sqlalchemy import select
 from ..models import Task
 
 from ..database import get_db
@@ -114,3 +115,21 @@ def increment_priority(task_id:int,db:Session=Depends(get_db)):
 
     task = task_service.get_task_by_id(db,task_id)
     return task
+
+
+@router.post("/{task_id}/increment-priority-locked")
+def increment_prioriyt_locked(task_id:int,db:Session = Depends(get_db)):
+    statement = (
+        select(Task).where(Task.id == task_id).with_for_update()
+    )
+    result = db.execute(statement)
+    task = result.scalar_one_or_none()
+
+    if task is None:
+        raise HTTPException(status_code=404,detail="Task not found")
+    task.priority +=1
+    db.commit()
+    db.refresh(task)
+
+    return task
+

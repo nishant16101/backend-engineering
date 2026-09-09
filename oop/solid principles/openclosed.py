@@ -35,4 +35,5 @@ class DiscountService2:
 service = DiscountService2(PremiumDiscount())
 
 print(service.calculate(1000))
+
     

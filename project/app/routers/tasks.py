@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import update
 from sqlalchemy import select
 from ..models import Task
+import time
 
 from ..database import get_db
 from ..schemas import (
@@ -133,3 +134,13 @@ def increment_prioriyt_locked(task_id:int,db:Session = Depends(get_db)):
 
     return task
 
+
+@router.get("/pool-test")
+def pool_test(db:Session = Depends(get_db)):
+    print("Connection acquired")
+    time.sleep(10)
+    print("Request finished")
+
+    return {
+        "message":"Request complete"
+    }

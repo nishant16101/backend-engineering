@@ -144,3 +144,22 @@ def pool_test(db:Session = Depends(get_db)):
     return {
         "message":"Request complete"
     }
+
+
+@router.post("/{task_id}/transaction-test")
+async def transaction_test(task_id:int,db:AsyncSession = Depends(get_db)):
+    async with db.begin():
+        statement = (select(Task).where(Task.id == task_id))
+        result = await db.execute(statement)
+
+        task = result.scalar_one_or_more()
+        if task is None:
+            raise HTTPException(status_code=404,detail="Task not Found")
+        task.priority +=1
+
+    return {
+        "message": "Priority updated",
+        "task_id": task_id,
+        "priority": task.priority
+    }
+

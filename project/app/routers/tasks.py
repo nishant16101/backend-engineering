@@ -6,7 +6,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import update
 from sqlalchemy import select
 from ..models import Task
+from ..services.external_service import get_post
 import time
+from ..services.external_service import (
+    sequential_requests,
+    concurrent_requests
+)
 
 from ..database import get_db
 from ..schemas import (
@@ -119,21 +124,32 @@ def increment_priority(task_id:int,db:AsyncSession=Depends(get_db)):
 
 
 @router.post("/{task_id}/increment-priority-locked")
-def increment_prioriyt_locked(task_id:int,db:Session = Depends(get_db)):
-    statement = (
-        select(Task).where(Task.id == task_id).with_for_update()
-    )
-    result = db.execute(statement)
-    task = result.scalar_one_or_none()
+async def increment_priority_locked(
+    task_id: int,
+    db: AsyncSession = Depends(get_db)
+):
 
-    if task is None:
-        raise HTTPException(status_code=404,detail="Task not found")
-    task.priority +=1
-    db.commit()
-    db.refresh(task)
+    async with db.begin():
+
+        statement = (
+            select(Task)
+            .where(Task.id == task_id)
+            .with_for_update()
+        )
+
+        result = await db.execute(statement)
+
+        task = result.scalar_one_or_none()
+
+        if task is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Task not found"
+            )
+
+        task.priority += 1
 
     return task
-
 
 @router.get("/pool-test")
 def pool_test(db:Session = Depends(get_db)):
@@ -162,4 +178,22 @@ async def transaction_test(task_id:int,db:AsyncSession = Depends(get_db)):
         "task_id": task_id,
         "priority": task.priority
     }
+
+@router.get("/{task_id}/external")
+async def external_api_test(task_id:int):
+    data = await get_post(task_id)
+    return {
+        "source":"external_api",
+        "data":data
+    }
+
+@router.get("/external/sequential")
+async def sequential_external():
+
+    return await sequential_requests()
+
+@router.get("/external/concurrent")
+async def concurrent_external():
+
+    return await concurrent_requests()
 

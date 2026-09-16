@@ -1,12 +1,13 @@
 
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter, Depends, status,HTTPException
+from fastapi import APIRouter, Depends, status,HTTPException,BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import update
 from sqlalchemy import select
 from ..models import Task
 from ..services.external_service import get_post
+from ..services.background_service import send_email
 import time
 from ..services.external_service import (
     sequential_requests,
@@ -196,4 +197,16 @@ async def sequential_external():
 async def concurrent_external():
 
     return await concurrent_requests()
+
+
+@router.post("/{task_id}/send-email")
+async def send_task_email(task_id:int,background_task:BackgroundTasks):
+    background_task.add_task(
+        send_email,task_id
+    )
+
+    return {
+        "message":"Email scheduled",
+        "task_id":task_id
+    }
 

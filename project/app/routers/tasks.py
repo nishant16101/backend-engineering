@@ -13,6 +13,7 @@ from ..services.external_service import (
     sequential_requests,
     concurrent_requests
 )
+from ..services import queue_service
 
 from ..database import get_db
 from ..schemas import (
@@ -210,3 +211,20 @@ async def send_task_email(task_id:int,background_task:BackgroundTasks):
         "task_id":task_id
     }
 
+
+@router.post("/{task_id}/queue-notification")
+async def queue_notification(
+    task_id: int
+):
+
+    job = {
+        "task_id": task_id,
+        "type": "send_notification"
+    }
+
+    await queue_service.enqueue_job(job)
+
+    return {
+        "message": "Job added to queue",
+        "task_id": task_id
+    }

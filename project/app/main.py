@@ -2,7 +2,8 @@ from fastapi import FastAPI
 
 from .database import Base, engine
 from . import models
-from .routers import tasks
+from .routers import tasks,jobs
+
 
 
 app = FastAPI(
@@ -35,3 +36,4 @@ async def health_check():
 
 
 app.include_router(tasks.router)
+app.include_router(jobs.router)

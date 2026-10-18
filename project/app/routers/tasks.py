@@ -22,6 +22,7 @@ from ..schemas import (
     TaskResponse
 )
 from ..services import task_service
+from app.rate_limiter import rate_limit
 
 router = APIRouter(
     prefix="/tasks",
@@ -44,10 +45,7 @@ async def create_task(
     )
 
 
-@router.get(
-    "/",
-    response_model=list[TaskResponse]
-)
+@router.get("/", dependencies=[Depends(rate_limit)])
 async def get_tasks(
     skip: int = 0,
     limit: int = 100,
@@ -217,14 +215,11 @@ async def queue_notification(
     task_id: int
 ):
 
-    job = {
-        "task_id": task_id,
-        "type": "send_notification"
-    }
-
-    await queue_service.enqueue_job(job)
-
+    job = await queue_service.create_job(
+        task_id
+    )
     return {
-        "message": "Job added to queue",
-        "task_id": task_id
+        "job_id":job["job_id"],
+        "status":"pending",
+        "task_id":task_id
     }

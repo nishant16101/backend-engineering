@@ -45,7 +45,48 @@ async def worker():
 
         job = json.loads(data)
 
+        job_id = job["job_id"]
+
+        await update_job_status(
+            client,
+            job_id,
+            "processing"
+        )
+
+        try:
+
+            await process_job(job)
+
+            await update_job_status(
+                client,
+                job_id,
+                "completed"
+            )
+
+        except Exception as exc:
+
+            print(
+                f"Job {job_id} failed: {exc}"
+            )
+
+            await update_job_status(
+                client,
+                job_id,
+                "failed"
+            )
+
         await process_job(job)
+async def update_job_status(
+    client,
+    job_id: str,
+    status: str
+):
+
+    await client.hset(
+        f"job:{job_id}",
+        "status",
+        status
+    )
 
 
 if __name__ == "__main__":
